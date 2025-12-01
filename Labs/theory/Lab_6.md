@@ -24,7 +24,7 @@
 
 ### 1. Настройка Keycloak
 - Используется существующий Keycloak сервер (`http://localhost:8080`)
-- Создан Realm: `myapp-realm`
+- Создан Realm: `myapp-reaam`
 - Создан Client: `myapp-web` с поддержкой:
   - Client Authentication
   - Standard Flow (Authorization Code)
@@ -42,7 +42,7 @@ Microsoft.AspNetCore.Authentication.JwtBearer
 ```json
 "AuthServer": {
   "Host": "http://localhost:8080",
-  "Realm": "myapp-realm"
+  "Realm": "myapp-reaam"
 }
 ```
 
@@ -79,7 +79,7 @@ Microsoft.AspNetCore.Authentication.JwtBearer
 ```json
 "Keycloak": {
   "Host": "http://localhost:8080",
-  "Realm": "myapp-realm",
+  "Realm": "myapp-reaam",
   "ClientId": "myapp-web",
   "ClientSecret": "..."
 }

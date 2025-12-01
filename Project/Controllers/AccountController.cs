@@ -18,29 +18,49 @@ public class AccountController : Controller
         _fileService = fileService;
     }
 
-    public async Task Login(string? returnUrl = null)
+    public IActionResult Login(string? returnUrl = null)
     {
-        await HttpContext.ChallengeAsync("keycloak", new AuthenticationProperties
+        var redirectUri = returnUrl ?? Url.Action("Index", "Home");
+        var properties = new AuthenticationProperties
         {
-            RedirectUri = returnUrl ?? Url.Action("Index", "Home")
-        });
+            RedirectUri = redirectUri
+        };
+        // Принудительно показывать форму входа
+        properties.Items["prompt"] = "login";
+        
+        return Challenge(properties, "keycloak");
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignOutAsync("keycloak", new AuthenticationProperties
-        {
-            RedirectUri = Url.Action("Index", "Home")
-        });
+        // Получаем id_token для logout
+        var idToken = await HttpContext.GetTokenAsync("id_token");
         
-        return RedirectToAction("Index", "Home");
+        // Выход из локальной сессии
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        
+        // Выход из Keycloak
+        var keycloakHost = HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Keycloak:Host"];
+        var keycloakRealm = HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Keycloak:Realm"];
+        var redirectUri = Url.Action("Index", "Home", null, Request.Scheme);
+        
+        var logoutUrl = $"{keycloakHost}/realms/{keycloakRealm}/protocol/openid-connect/logout" +
+                        $"?id_token_hint={idToken}" +
+                        $"&post_logout_redirect_uri={Uri.EscapeDataString(redirectUri!)}";
+        
+        return Redirect(logoutUrl);
     }
 
     [HttpGet]
     public IActionResult Register()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
     {
         return View();
     }

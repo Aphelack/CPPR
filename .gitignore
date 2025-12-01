@@ -15,3 +15,8 @@ project.assets.json
 *.nuget.targets
 *.dgspec.json
 *.lock.json
+
+# Environment files
+.env
+*.env
+Project/.env

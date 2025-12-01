@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Доступ запрещён";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Доступ запрещён</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="card-text">У вас нет прав для доступа к этой странице.</p>
+                    <p class="text-muted">Требуется роль: <strong>POWER-USER</strong></p>
+                    
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <p>Вы вошли как: <strong>@(User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value ?? User.Identity.Name)</strong></p>
+                        
+                        <div class="mt-3">
+                            <p class="small text-muted">Ваши роли:</p>
+                            <ul class="list-unstyled">
+                                @foreach (var claim in User.Claims.Where(c => c.Type.Contains("role") || c.Type == System.Security.Claims.ClaimTypes.Role))
+                                {
+                                    <li><span class="badge bg-secondary">@claim.Type: @claim.Value</span></li>
+                                }
+                            </ul>
+                            
+                            <details class="mt-3">
+                                <summary class="text-muted">Все claims (debug)</summary>
+                                <ul class="list-unstyled small text-start">
+                                    @foreach (var claim in User.Claims)
+                                    {
+                                        <li><code>@claim.Type</code>: @claim.Value</li>
+                                    }
+                                </ul>
+                            </details>
+                        </div>
+                    }
+                    
+                    <hr />
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-house"></i> На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
