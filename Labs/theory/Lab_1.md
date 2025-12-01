@@ -1,24 +1,23 @@
-# Lab 1: Introduction to ASP.NET Core MVC
+# Лабораторная работа №1: Введение в ASP.NET Core MVC
 
-## Theory
-In this lab, we learned about the basic structure of an ASP.NET Core MVC application. We explored how Controllers and Views interact.
+## Теория
+В этой лабораторной работе я познакомился с базовой структурой приложения ASP.NET Core MVC. Я изучил, как взаимодействуют контроллеры и представления.
 
-### Key Concepts
-- **Controller**: Handles incoming requests, processes them, and returns a response (usually a View).
-- **View**: The user interface, typically a Razor view (.cshtml).
-- **Routing**: How URLs are mapped to Controller actions.
+### Ключевые понятия
+- **Controller**: Обрабатывает входящие запросы и возвращает ответ (обычно представление).
+- **View**: Пользовательский интерфейс, обычно Razor view (.cshtml).
+- **Routing**: Сопоставление URL с действиями контроллера.
 
-## Implementation Details
-- Created `HomeController`.
-- Created `Index` view.
-- Displayed "Hello World!".
-- **Layout**: Created a shared layout `_Layout.cshtml` with a header (navbar), main content area, and footer.
-- **Styling**: Used Bootstrap 5 and custom CSS in `site.css`.
-- **Navigation**: Added a responsive navbar with dropdowns and social icons in the footer.
-- **Content**: Added a form and an ordered list to the Index view.
+## Ход работы
+Я начал с создания пустого проекта и настройки окружения.
+1.  **Создание контроллера**: Я создал `HomeController` с методом `Index`.
+2.  **Создание представления**: Добавил `Index.cshtml`, который выводит "Hello World!".
+3.  **Макет (Layout)**: Чтобы не дублировать код, я создал общий макет `_Layout.cshtml`. В нем я разместил шапку с навигацией и подвал.
+4.  **Стилизация**: Подключил библиотеку Bootstrap 5 для красивого оформления. Также добавил свои стили в `site.css`.
+5.  **Навигация**: В шапке сделал меню с выпадающими списками, а в подвале — иконки соцсетей.
+6.  **Контент**: На главной странице добавил форму и нумерованный список, чтобы проверить работу стилей.
 
-## Tools Used
-- VS Code
-- .NET CLI
-- Bootstrap 5
-- jQuery
+## Использованные инструменты
+- **VS Code**: В качестве редактора кода.
+- **.NET CLI**: Для создания проекта, сборки и запуска.
+- **Bootstrap 5**: Для верстки и адаптивности.
