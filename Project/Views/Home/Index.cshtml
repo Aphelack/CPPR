@@ -1,13 +1,18 @@
+@model IEnumerable<Project.Models.ListDemo>
 @{
     ViewBag.Title = "Index";
 }
 
-<h2>Lab 1 Content</h2>
+<h1>@ViewData["LabTitle"]</h1>
 
 <form method="get">
     <div class="mb-3">
         <label for="exampleInput" class="form-label">Example Input</label>
         <input type="text" class="form-control" id="exampleInput" name="data">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Select Item</label>
+        <select asp-items="@(new SelectList(Model, "Id", "Name"))" class="form-select"></select>
     </div>
     <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" id="exampleCheck" name="check">
@@ -18,7 +23,8 @@
 
 <h3>List of Items</h3>
 <ol type="A">
-    <li>Item 1</li>
-    <li>Item 2</li>
-    <li>Item 3</li>
+    @foreach (var item in Model)
+    {
+        <li>@item.Name (Id: @item.Id)</li>
+    }
 </ol>

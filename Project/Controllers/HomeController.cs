@@ -15,7 +15,16 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        ViewData["LabTitle"] = "Лабораторная работа №2";
+
+        var listDemo = new List<ListDemo>
+        {
+            new ListDemo { Id = 1, Name = "Item 1" },
+            new ListDemo { Id = 2, Name = "Item 2" },
+            new ListDemo { Id = 3, Name = "Item 3" }
+        };
+
+        return View(listDemo);
     }
 
     public IActionResult Privacy()
