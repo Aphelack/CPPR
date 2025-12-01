@@ -1,8 +1,24 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewBag.Title = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h2>Lab 1 Content</h2>
+
+<form method="get">
+    <div class="mb-3">
+        <label for="exampleInput" class="form-label">Example Input</label>
+        <input type="text" class="form-control" id="exampleInput" name="data">
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="exampleCheck" name="check">
+        <label class="form-check-label" for="exampleCheck">Check me out</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<h3>List of Items</h3>
+<ol type="A">
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+</ol>

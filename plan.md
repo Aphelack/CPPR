@@ -2,7 +2,7 @@
 
 | Lab | Topic | Status | Branch |
 |---|---|---|---|
-| 1 | Introduction to ASP.NET Core MVC | Not Started | - |
+| 1 | Introduction to ASP.NET Core MVC | In Progress | Lab-1 |
 | 2 | Razor Language, Partial Views, View Components | Not Started | - |
 | 3 | Working with Data | Not Started | - |
 | 4 | Working with REST API | Not Started | - |
