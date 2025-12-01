@@ -3,8 +3,8 @@
 | Lab | Topic | Status | Branch |
 |---|---|---|---|
 | 1 | Introduction to ASP.NET Core MVC | Completed | Lab-1 |
-| 2 | Razor Language, Partial Views, View Components | In Progress | Lab-2 |
-| 3 | Working with Data | Not Started | - |
+| 2 | Razor Language, Partial Views, View Components | Completed | Lab-2 |
+| 3 | Working with Data | In Progress | Lab-3 |
 | 4 | Working with REST API | Not Started | - |
 | 5 | Razor Pages. File Upload | Not Started | - |
 | 6 | Authentication and Authorization | Not Started | - |
