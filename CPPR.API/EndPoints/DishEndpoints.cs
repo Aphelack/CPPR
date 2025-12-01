@@ -15,7 +15,8 @@ namespace CPPR.API.EndPoints
         {
             var group = routes.MapGroup("/api/dish")
                 .WithTags("Dish")
-                .DisableAntiforgery();
+                .DisableAntiforgery()
+                .RequireAuthorization("admin");
 
             group.MapGet("/{category?}",
                 async (IMediator mediator, string? category, int pageNo = 1) =>
@@ -24,7 +25,8 @@ namespace CPPR.API.EndPoints
                     return Results.Ok(data);
                 })
             .WithName("GetAllDishes")
-            .WithOpenApi();
+            .WithOpenApi()
+            .AllowAnonymous();
 
             group.MapGet("/{id:int}", async (int id, AppDbContext db) =>
             {
@@ -34,7 +36,8 @@ namespace CPPR.API.EndPoints
                     : Results.NotFound(ResponseData<Dish>.Error("Dish not found"));
             })
             .WithName("GetDishById")
-            .WithOpenApi();
+            .WithOpenApi()
+            .AllowAnonymous();
 
             group.MapPost("/", async (
                 [FromForm] string dish,

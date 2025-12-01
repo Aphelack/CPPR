@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CPPR.Domain.Entities;
 using CPPR.Domain.Models;
+using Project.Services.Authorization;
 
 namespace Project.Services.ProductService
 {
@@ -9,11 +10,16 @@ namespace Project.Services.ProductService
         private readonly HttpClient _httpClient;
         private readonly ILogger<ApiProductService> _logger;
         private readonly JsonSerializerOptions _serializerOptions;
+        private readonly ITokenAccessor _tokenAccessor;
 
-        public ApiProductService(HttpClient httpClient, ILogger<ApiProductService> logger)
+        public ApiProductService(
+            HttpClient httpClient, 
+            ILogger<ApiProductService> logger,
+            ITokenAccessor tokenAccessor)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _tokenAccessor = tokenAccessor;
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -22,6 +28,8 @@ namespace Project.Services.ProductService
 
         public async Task<ResponseData<Dish>> CreateProductAsync(Dish product, IFormFile? formFile)
         {
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
@@ -55,6 +63,8 @@ namespace Project.Services.ProductService
 
         public async Task DeleteProductAsync(int id)
         {
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            
             var response = await _httpClient.DeleteAsync($"dish/{id}");
             if (!response.IsSuccessStatusCode)
             {
@@ -96,6 +106,8 @@ namespace Project.Services.ProductService
 
         public async Task UpdateProductAsync(int id, Dish product, IFormFile? formFile)
         {
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,

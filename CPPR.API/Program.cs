@@ -1,5 +1,6 @@
 using CPPR.API.Data;
 using CPPR.API.EndPoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,24 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Keycloak Authentication
+var authServerHost = builder.Configuration["AuthServer:Host"];
+var authServerRealm = builder.Configuration["AuthServer:Realm"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MetadataAddress = $"{authServerHost}/realms/{authServerRealm}/.well-known/openid-configuration";
+        options.Authority = $"{authServerHost}/realms/{authServerRealm}";
+        options.Audience = "account";
+        options.RequireHttpsMetadata = false;
+    });
+
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("admin", p => p.RequireRole("POWER-USER"));
+});
 
 var connString = builder.Configuration.GetConnectionString("Postgres");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connString));
@@ -27,6 +46,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapDishEndpoints();

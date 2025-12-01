@@ -6,8 +6,8 @@
 | 2 | Razor Language, Partial Views, View Components | Completed | Lab-2 |
 | 3 | Working with Data | Completed | Lab-3 |
 | 4 | Working with REST API | Completed | Lab-4 |
-| 5 | Razor Pages. File Upload | In Progress | Lab-5 |
-| 6 | Authentication and Authorization | Not Started | - |
+| 5 | Razor Pages. File Upload | Completed | Lab-5 |
+| 6 | Authentication and Authorization | Completed | Lab-6 |
 | 7 | Tag Helpers, Ajax | Not Started | - |
 | 8 | Routing, Session State, Caching | Not Started | - |
 | 9 | Unit Testing | Not Started | - |
