@@ -1,0 +1,72 @@
+@model ListModel<Dish>
+
+@{
+    ViewData["Title"] = "Catalog";
+    var categories = ViewData["Categories"] as List<Category>;
+    var currentCategory = ViewData["CurrentCategory"] as string;
+    var request = ViewContext.HttpContext.Request;
+    var returnUrl = request.Path + request.QueryString.ToUriComponent();
+}
+
+<div class="row">
+    <div class="col-2">
+        <div class="dropdown mt-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                @(categories?.FirstOrDefault(c => c.NormalizedName == currentCategory)?.Name ?? "Все")
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-category="">Все</a>
+                </li>
+                @if (categories != null)
+                {
+                    foreach (var item in categories)
+                    {
+                        <li>
+                            <a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-category="@item.NormalizedName">
+                                @item.Name
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-10">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var item in Model.Items)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="@item.Image" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <p class="card-text">@item.Description</p>
+                            <p class="card-text"><small class="text-muted">@item.Calories ккал</small></p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" class="btn btn-primary">Добавить в корзину</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-controller="Product" asp-action="Index" asp-route-category="@currentCategory" asp-route-pageNo="@(Model.CurrentPage - 1)">Previous</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                        <a class="page-link" asp-controller="Product" asp-action="Index" asp-route-category="@currentCategory" asp-route-pageNo="@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-controller="Product" asp-action="Index" asp-route-category="@currentCategory" asp-route-pageNo="@(Model.CurrentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
