@@ -10,6 +10,10 @@ public static class HostingExtensions
     public static void RegisterCustomServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<ICategoryService, MemoryCategoryService>();
-        builder.Services.AddScoped<IProductService, MemoryProductService>();
+        
+        builder.Services.AddHttpClient<IProductService, ApiProductService>(opt =>
+        {
+            opt.BaseAddress = new Uri("http://localhost:5002/api/");
+        });
     }
 }
