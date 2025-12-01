@@ -1,30 +1,32 @@
-# Lab 2: Razor Language, Partial Views, View Components
+# Лабораторная работа №2: Язык Razor, Частичные представления, Компоненты
 
-## Theory
-In this lab, we explored the Razor syntax and how to modularize views using Partial Views and View Components.
+## Теория
+В этой работе я углубился в синтаксис Razor и научился разделять интерфейс на переиспользуемые части.
 
-### Key Concepts
-- **Razor Syntax**: Mixing C# with HTML (e.g., `@foreach`, `@if`).
-- **Tag Helpers**: Server-side attributes that transform into HTML (e.g., `asp-controller`, `asp-action`).
-- **Partial Views**: Reusable chunks of Razor markup (`_MenuPartial`, `_UserInfoPartial`).
-- **View Components**: More powerful than partials, can have logic in a C# class (`CartViewComponent`).
-- **ViewData/ViewBag**: Passing data from Controller to View.
+### Ключевые понятия
+- **Razor Syntax**: Смешивание C# кода с HTML разметкой.
+- **Tag Helpers**: Специальные атрибуты (например, `asp-controller`), которые сервер преобразует в HTML.
+- **Partial Views**: Частичные представления для повторного использования кода (меню, инфо о пользователе).
+- **View Components**: Более сложные компоненты с собственной логикой на C#.
 
-## Implementation Details
-- **Tag Helpers**: Updated `_Layout.cshtml` to use `asp-*` helpers for navigation.
-- **Data Passing**:
-    - Passed "Lab 2" title via `ViewData`.
-    - Passed a list of `ListDemo` objects as the model to `Index` view.
-    - Used `SelectList` and `asp-items` to render a dropdown.
-- **Partial Views**:
-    - Extracted navigation menu to `_MenuPartial.cshtml`.
-    - Extracted user info to `_UserInfoPartial.cshtml`.
-    - Implemented "active" class logic for menu items.
-- **View Components**:
-    - Created `CartViewComponent` to render the cart summary.
-    - Invoked it within `_UserInfoPartial`.
+## Ход работы
+Я продолжил работу над проектом из первой лабы.
+1.  **Tag Helpers**: Заменил обычные ссылки `href` на Tag Helpers `asp-controller` и `asp-action` в меню. Это делает ссылки более надежными при изменении маршрутов.
+2.  **Передача данных**:
+    - В методе `Index` контроллера я создал список объектов `ListDemo`.
+    - Передал этот список в представление как модель.
+    - Через `ViewData` передал заголовок страницы.
+    - На странице использовал `SelectList` и `asp-items` для создания выпадающего списка.
+3.  **Частичные представления (Partial Views)**:
+    - Вынес меню навигации в отдельный файл `_MenuPartial.cshtml`.
+    - Информацию о пользователе вынес в `_UserInfoPartial.cshtml`.
+    - Добавил логику подсветки активного пункта меню.
+4.  **Компоненты представления (View Components)**:
+    - Создал класс `CartViewComponent` для отображения корзины.
+    - Создал представление для компонента `Default.cshtml`.
+    - Встроил вызов компонента в `_UserInfoPartial`.
 
-## Tools Used
-- VS Code
-- .NET CLI
-- Razor
+## Использованные инструменты
+- **VS Code**
+- **.NET CLI**
+- **Razor**
