@@ -21,4 +21,5 @@ project.assets.json
 *.env
 Project/.env
 
-.fakeProject/Logs/
+.fake
+Project/Logs/
