@@ -21,6 +21,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = $"{authServerHost}/realms/{authServerRealm}";
         options.Audience = "account";
         options.RequireHttpsMetadata = false;
+        
+        // Map roles from Keycloak token
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidIssuer = $"{authServerHost}/realms/{authServerRealm}",
+            RoleClaimType = "role",
+            NameClaimType = "preferred_username"
+        };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var identity = context.Principal?.Identity as System.Security.Claims.ClaimsIdentity;
+                if (identity == null) return Task.CompletedTask;
+
+                // Extract roles from realm_access.roles
+                var realmAccessClaim = context.Principal?.Claims.FirstOrDefault(c => c.Type == "realm_access");
+                if (realmAccessClaim != null)
+                {
+                    var realmAccess = System.Text.Json.JsonDocument.Parse(realmAccessClaim.Value);
+                    if (realmAccess.RootElement.TryGetProperty("roles", out var roles))
+                    {
+                        foreach (var role in roles.EnumerateArray())
+                        {
+                            var roleValue = role.GetString();
+                            if (!string.IsNullOrEmpty(roleValue))
+                            {
+                                identity.AddClaim(new System.Security.Claims.Claim("role", roleValue));
+                            }
+                        }
+                    }
+                }
+                
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization(opt =>

@@ -1,0 +1,64 @@
+@model CPPR.Domain.Entities.Cart
+
+@{
+    ViewData["Title"] = "Корзина заказов";
+}
+
+<h1>Корзина заказов</h1>
+
+@if (Model.CartItems.Count == 0)
+{
+    <div class="alert alert-info">
+        Корзина пуста
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Калорий (на порцию)</th>
+                <th>Количество</th>
+                <th>Всего калорий</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.CartItems.Values)
+            {
+                <tr>
+                    <td>
+                        <img src="@item.Item.Image" alt="@item.Item.Name" style="width: 100px; height: 100px; object-fit: cover;">
+                    </td>
+                    <td>@item.Item.Name</td>
+                    <td>@item.Item.Calories</td>
+                    <td>@item.Count</td>
+                    <td>@(item.Item.Calories * item.Count)</td>
+                    <td>
+                        @{
+                            var request = ViewContext.HttpContext.Request;
+                            var returnUrl = request.Path + request.QueryString.ToUriComponent();
+                        }
+                        <a asp-controller="Cart" asp-action="Remove" asp-route-id="@item.Item.Id" asp-route-returnUrl="@returnUrl" class="btn btn-danger btn-sm">
+                            Удалить
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-end"><strong>Итого:</strong></td>
+                <td><strong>@Model.TotalCalories ккал</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="mt-3">
+        <a asp-controller="Cart" asp-action="Clear" class="btn btn-warning">Очистить корзину</a>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-primary">Продолжить покупки</a>
+    </div>
+}

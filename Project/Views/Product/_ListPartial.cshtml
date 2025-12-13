@@ -1,0 +1,34 @@
+@model ListModel<Dish>
+
+@{
+    var currentCategory = ViewData["CurrentCategory"] as string;
+    var request = ViewContext.HttpContext.Request;
+    var returnUrl = request.Path + request.QueryString.ToUriComponent();
+}
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var item in Model.Items)
+    {
+        <div class="col">
+            <div class="card h-100">
+                <img src="@item.Image" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+                    <p class="card-text">@item.Description</p>
+                    <p class="card-text"><small class="text-muted">@item.Calories ккал</small></p>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Cart" asp-action="Add" asp-route-id="@item.Id" asp-route-returnUrl="@returnUrl" class="btn btn-primary">
+                        Добавить в корзину
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<nav aria-label="Page navigation" class="mt-4">
+    <pager current-page="@Model.CurrentPage"
+           total-pages="@Model.TotalPages"
+           category="@currentCategory"></pager>
+</nav>

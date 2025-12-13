@@ -1,6 +1,7 @@
 using CPPR.Domain.Entities;
 using CPPR.Domain.Models;
 using Project.Services.Authorization;
+using Project.Services.CartService;
 using Project.Services.CategoryService;
 using Project.Services.FileService;
 using Project.Services.ProductService;
@@ -24,5 +25,8 @@ public static class HostingExtensions
         {
             opt.BaseAddress = new Uri("http://localhost:5002/api/");
         });
+        
+        // Register Cart service
+        builder.Services.AddScoped<Cart>(sp => new SessionCart(sp.GetRequiredService<IHttpContextAccessor>()));
     }
 }

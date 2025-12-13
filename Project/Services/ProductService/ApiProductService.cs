@@ -28,13 +28,18 @@ namespace Project.Services.ProductService
 
         public async Task<ResponseData<Dish>> CreateProductAsync(Dish product, IFormFile? formFile)
         {
-            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            var token = await _tokenAccessor.GetAccessTokenAsync();
             
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri(_httpClient.BaseAddress!, "dish")
             };
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
 
             var content = new MultipartFormDataContent();
 
@@ -44,7 +49,16 @@ namespace Project.Services.ProductService
                 content.Add(streamContent, "file", formFile.FileName);
             }
 
-            var data = new StringContent(JsonSerializer.Serialize(product));
+            var dishData = new
+            {
+                product.Id,
+                product.Name,
+                product.Description,
+                product.Calories,
+                product.CategoryId
+            };
+
+            var data = new StringContent(JsonSerializer.Serialize(dishData));
             content.Add(data, "dish");
 
             request.Content = content;
@@ -63,9 +77,20 @@ namespace Project.Services.ProductService
 
         public async Task DeleteProductAsync(int id)
         {
-            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            var token = await _tokenAccessor.GetAccessTokenAsync();
             
-            var response = await _httpClient.DeleteAsync($"dish/{id}");
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_httpClient.BaseAddress!, $"dish/{id}")
+            };
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            var response = await _httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError($"-----> object not deleted. Error: {response.StatusCode}");
@@ -106,13 +131,18 @@ namespace Project.Services.ProductService
 
         public async Task UpdateProductAsync(int id, Dish product, IFormFile? formFile)
         {
-            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            var token = await _tokenAccessor.GetAccessTokenAsync();
             
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
                 RequestUri = new Uri(_httpClient.BaseAddress!, $"dish/{id}")
             };
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
 
             var content = new MultipartFormDataContent();
 
@@ -122,7 +152,16 @@ namespace Project.Services.ProductService
                 content.Add(streamContent, "file", formFile.FileName);
             }
 
-            var data = new StringContent(JsonSerializer.Serialize(product));
+            var dishData = new
+            {
+                Id = id,
+                product.Name,
+                product.Description,
+                product.Calories,
+                product.CategoryId
+            };
+
+            var data = new StringContent(JsonSerializer.Serialize(dishData));
             content.Add(data, "dish");
 
             request.Content = content;
