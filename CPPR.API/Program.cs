@@ -70,6 +70,21 @@ builder.Services.AddAuthorization(opt =>
 var connString = builder.Configuration.GetConnectionString("Postgres");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connString));
 
+// Add caching services
+builder.Services.AddHybridCache();
+builder.Services.AddStackExchangeRedisCache(opt =>
+{
+    opt.InstanceName = "labs_";
+    opt.Configuration = builder.Configuration.GetConnectionString("Redis");
+    opt.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+    {
+        EndPoints = { "localhost:6379" },
+        ConnectTimeout = 10000,
+        SyncTimeout = 5000,
+        AbortOnConnectFail = false
+    };
+});
+
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));

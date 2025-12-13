@@ -6,6 +6,7 @@ using CPPR.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace CPPR.API.EndPoints
 {
@@ -19,9 +20,18 @@ namespace CPPR.API.EndPoints
                 .RequireAuthorization("admin");
 
             group.MapGet("/{category?}",
-                async (IMediator mediator, string? category, int pageNo = 1) =>
+                async (IMediator mediator, HybridCache cache, string? category, int pageNo = 1) =>
                 {
-                    var data = await mediator.Send(new GetListOfProducts(category, pageNo));
+                    var data = await cache.GetOrCreateAsync(
+                        $"dishes_{category}_{pageNo}",
+                        async token => await mediator.Send(
+                            new GetListOfProducts(category, pageNo)),
+                        options: new HybridCacheEntryOptions
+                        {
+                            Expiration = TimeSpan.FromMinutes(1),
+                            LocalCacheExpiration = TimeSpan.FromSeconds(30)
+                        }
+                    );
                     return Results.Ok(data);
                 })
             .WithName("GetAllDishes")
