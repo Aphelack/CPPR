@@ -20,3 +20,5 @@ project.assets.json
 .env
 *.env
 Project/.env
+
+.fake
