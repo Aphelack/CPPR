@@ -6,7 +6,7 @@ using CPPR.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace CPPR.API.EndPoints
 {
@@ -20,18 +20,43 @@ namespace CPPR.API.EndPoints
                 .RequireAuthorization("admin");
 
             group.MapGet("/{category?}",
-                async (IMediator mediator, HybridCache cache, string? category, int pageNo = 1) =>
+                async (IMediator mediator, IDistributedCache cache, string? category, int pageNo = 1) =>
                 {
-                    var data = await cache.GetOrCreateAsync(
-                        $"dishes_{category}_{pageNo}",
-                        async token => await mediator.Send(
-                            new GetListOfProducts(category, pageNo)),
-                        options: new HybridCacheEntryOptions
+                    ResponseData<ListModel<Dish>>? data = null;
+                    var cacheKey = $"dishes_{category}_{pageNo}";
+                    
+                    try
+                    {
+                        var cachedData = await cache.GetStringAsync(cacheKey);
+                        if (cachedData != null)
                         {
-                            Expiration = TimeSpan.FromMinutes(1),
-                            LocalCacheExpiration = TimeSpan.FromSeconds(30)
+                            data = JsonSerializer.Deserialize<ResponseData<ListModel<Dish>>>(cachedData);
                         }
-                    );
+                    }
+                    catch (Exception)
+                    {
+                        // Redis unavailable, continue without cache
+                    }
+                    
+                    if (data == null)
+                    {
+                        data = await mediator.Send(new GetListOfProducts(category, pageNo));
+                        
+                        try
+                        {
+                            var serialized = JsonSerializer.Serialize(data);
+                            var options = new DistributedCacheEntryOptions
+                            {
+                                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+                            };
+                            await cache.SetStringAsync(cacheKey, serialized, options);
+                        }
+                        catch (Exception)
+                        {
+                            // Redis unavailable, continue without caching
+                        }
+                    }
+                    
                     return Results.Ok(data);
                 })
             .WithName("GetAllDishes")

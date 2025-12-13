@@ -70,19 +70,12 @@ builder.Services.AddAuthorization(opt =>
 var connString = builder.Configuration.GetConnectionString("Postgres");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connString));
 
-// Add caching services
-builder.Services.AddHybridCache();
-builder.Services.AddStackExchangeRedisCache(opt =>
+// Add Redis distributed cache with simple configuration
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    opt.InstanceName = "labs_";
-    opt.Configuration = builder.Configuration.GetConnectionString("Redis");
-    opt.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
-    {
-        EndPoints = { "localhost:6379" },
-        ConnectTimeout = 10000,
-        SyncTimeout = 5000,
-        AbortOnConnectFail = false
-    };
+    var connectionString = builder.Configuration.GetConnectionString("Redis") ?? "127.0.0.1:6379";
+    options.Configuration = $"{connectionString},abortConnect=false,connectTimeout=1000,syncTimeout=1000";
+    options.InstanceName = "labs_";
 });
 
 builder.Services.AddControllers();
