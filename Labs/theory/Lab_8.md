@@ -42,37 +42,21 @@ public async Task<IActionResult> Index(string? category, int pageNo = 1)
 ### Описание
 Реализовано кэширование списка блюд с использованием **HybridCache** и **Redis** в качестве распределенного хранилища.
 
-### 2.1. Добавление Redis
+### 2.1. Установка Redis
 
-**Файл:** `compose.yaml`
+Redis установлен в системе локально (без использования Docker).
 
-Создан Docker Compose файл для запуска Redis:
-
-```yaml
-services:
-  redis:
-    image: redis:7.2-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - app_network
-    restart: unless-stopped
-
-volumes:
-  redis_data:
-    driver: local
-
-networks:
-  app_network:
-    driver: bridge
+**Установка (Linux):**
+```bash
+sudo apt-get install redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
 ```
 
-**Запуск Redis:**
+**Проверка работы:**
 ```bash
-docker compose up -d
+redis-cli ping
+# Ответ: PONG
 ```
 
 ### 2.2. Подготовка проекта CPPR.API
@@ -91,53 +75,70 @@ docker compose up -d
 **NuGet пакеты:** `CPPR.API/CPPR.API.csproj`
 
 Добавлены пакеты для работы с кэшированием:
-- `Microsoft.Extensions.Caching.Hybrid` (версия 9.0.0)
 - `Microsoft.Extensions.Caching.StackExchangeRedis` (версия 8.0.0)
 
 **Регистрация сервисов:** `CPPR.API/Program.cs`
 
 ```csharp
-builder.Services.AddHybridCache();
-builder.Services.AddStackExchangeRedisCache(opt =>
+// Add Redis distributed cache with simple configuration
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    opt.InstanceName = "labs_";
-    opt.Configuration = builder.Configuration.GetConnectionString("Redis");
-    opt.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
-    {
-        EndPoints = { "localhost:6379" },
-        ConnectTimeout = 10000,
-        SyncTimeout = 5000,
-        AbortOnConnectFail = false
-    };
+    options.Configuration = "127.0.0.1:6379,abortConnect=false,connectTimeout=30000,syncTimeout=30000";
+    options.InstanceName = "labs_";
 });
 ```
 
 **Параметры конфигурации:**
 - `InstanceName` - префикс для ключей в Redis
-- `ConnectTimeout` - таймаут подключения (10 секунд)
-- `SyncTimeout` - таймаут синхронных операций (5 секунд)
-- `AbortOnConnectFail = false` - не прерывать работу при недоступности Redis
+- `abortConnect=false` - не прерывать работу при недоступности Redis
+- `connectTimeout=30000` - таймаут подключения (30 секунд)
+- `syncTimeout=30000` - таймаут синхронных операций (30 секунд)
 
 ### 2.3. Кэширование данных
 
 **Файл:** `CPPR.API/EndPoints/DishEndpoints.cs`
 
-Изменена конечная точка получения списка блюд:
+Изменена конечная точка получения списка блюд для использования `IDistributedCache`:
 
 ```csharp
 group.MapGet("/{category?}",
-    async (IMediator mediator, HybridCache cache, string? category, int pageNo = 1) =>
+    async (IMediator mediator, IDistributedCache cache, string? category, int pageNo = 1) =>
     {
-        var data = await cache.GetOrCreateAsync(
-            $"dishes_{category}_{pageNo}",
-            async token => await mediator.Send(
-                new GetListOfProducts(category, pageNo)),
-            options: new HybridCacheEntryOptions
+        ResponseData<ListModel<Dish>>? data = null;
+        var cacheKey = $"dishes_{category}_{pageNo}";
+        
+        try
+        {
+            var cachedData = await cache.GetStringAsync(cacheKey);
+            if (cachedData != null)
             {
-                Expiration = TimeSpan.FromMinutes(1),
-                LocalCacheExpiration = TimeSpan.FromSeconds(30)
+                data = JsonSerializer.Deserialize<ResponseData<ListModel<Dish>>>(cachedData);
             }
-        );
+        }
+        catch (Exception)
+        {
+            // Redis unavailable, continue without cache
+        }
+        
+        if (data == null)
+        {
+            data = await mediator.Send(new GetListOfProducts(category, pageNo));
+            
+            try
+            {
+                var serialized = JsonSerializer.Serialize(data);
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+                };
+                await cache.SetStringAsync(cacheKey, serialized, options);
+            }
+            catch (Exception)
+            {
+                // Redis unavailable, continue without caching
+            }
+        }
+        
         return Results.Ok(data);
     })
 .WithName("GetAllDishes")
@@ -147,28 +148,24 @@ group.MapGet("/{category?}",
 
 **Механизм кэширования:**
 
-1. **Локальный кэш (L1)** - в памяти приложения
-   - Время жизни: 30 секунд
-   - Самый быстрый доступ
-   - Используется для часто запрашиваемых данных
+1. **Попытка чтения из кэша (Redis)**
+   - Если данные есть, десериализуем и возвращаем
+   - Если Redis недоступен, перехватываем исключение и продолжаем
 
-2. **Распределенный кэш (L2)** - Redis
-   - Время жизни: 1 минута
-   - Доступен всем экземплярам приложения
-   - Используется при отсутствии данных в L1
+2. **Запрос к базе данных**
+   - Если данных нет в кэше или кэш недоступен, запрашиваем данные через Mediator
 
-3. **База данных** - PostgreSQL
-   - Используется при отсутствии данных в кэше
-   - Результат сохраняется в кэш для последующих запросов
+3. **Сохранение в кэш**
+   - Сериализуем полученные данные
+   - Сохраняем в Redis с временем жизни 1 минута
+   - Если Redis недоступен, перехватываем исключение
 
 **Ключ кэша:** `dishes_{category}_{pageNo}`
 - Уникальный для каждой комбинации категории и номера страницы
-- Примеры: `dishes_salads_1`, `dishes__2`, `dishes_soups_1`
 
-**Временные интервалы:**
-- **< 30 секунд**: данные из локального кэша (мгновенный ответ)
-- **30 сек - 1 мин**: данные из Redis (быстрый ответ)
-- **> 1 минуты**: данные из БД, обновление кэша (нормальное время)
+**Время жизни кэша:**
+- **1 минута** - абсолютное время истечения кэша
+- При истечении времени данные запрашиваются из БД заново
 
 ---
 
