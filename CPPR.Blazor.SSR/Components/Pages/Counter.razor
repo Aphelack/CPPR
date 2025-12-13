@@ -1,0 +1,57 @@
+﻿@page "/counter"
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<hr />
+
+<h3>Set Counter Value</h3>
+<EditForm Model="@Model" OnValidSubmit="@SetCount">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Enter value (1-10):</label>
+        <InputNumber @bind-Value="Model.CountValue" class="form-control" style="width: 200px;" />
+    </div>
+    <button type="submit" class="btn btn-success">Set</button>
+</EditForm>
+
+@code {
+    private int currentCount = 0;
+    private CounterModel Model { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    public int? InitialCount { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (InitialCount.HasValue)
+        {
+            currentCount = InitialCount.Value;
+        }
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private void SetCount()
+    {
+        currentCount = Model.CountValue;
+    }
+
+    public class CounterModel
+    {
+        [Range(1, 10, ErrorMessage = "Value must be between 1 and 10")]
+        public int CountValue { get; set; }
+    }
+}
