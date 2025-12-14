@@ -23,4 +23,23 @@ Project/.env
 
 .fake
 Project/Logs/
-**/wwwroot/
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.bmp
+**/*.ico
+!**/favicon.ico
+**/*.svg
+**/*.webp
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Web development
+*.map
+node_modules/
