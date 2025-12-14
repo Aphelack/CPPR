@@ -1,0 +1,134 @@
+@page "/game"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<h3>Chuck-a-Luck Game</h3>
+
+@if (!Joined)
+{
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Enter Group Name" @bind="GroupName">
+        <button class="btn btn-primary" @onclick="JoinGame">Join Game</button>
+    </div>
+}
+else
+{
+    <p>Connected to group: <strong>@GroupName</strong></p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Place your bet</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Bet Amount</label>
+                        <input type="number" class="form-control" @bind="BetAmount">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Choose Number (1-6)</label>
+                        <input type="number" class="form-control" min="1" max="6" @bind="ChosenNumber">
+                    </div>
+                    <button class="btn btn-success" @onclick="RollDice" disabled="@IsRolling">Roll Dice</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Results</h5>
+                    @if (Dice1 > 0)
+                    {
+                        <div class="d-flex justify-content-around mb-3">
+                            <div class="border p-3">@Dice1</div>
+                            <div class="border p-3">@Dice2</div>
+                            <div class="border p-3">@Dice3</div>
+                        </div>
+                        @if (Winnings > 0)
+                        {
+                            <div class="alert alert-success">You won @Winnings!</div>
+                        }
+                        else if (Winnings < 0)
+                        {
+                            <div class="alert alert-danger">You lost @(-Winnings).</div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <h5>Messages</h5>
+        <ul>
+            @foreach (var message in messages)
+            {
+                <li>@message</li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    private HubConnection? hubConnection;
+    private List<string> messages = new List<string>();
+    private string? GroupName;
+    private int BetAmount = 10;
+    private int ChosenNumber = 1;
+    private int Dice1, Dice2, Dice3;
+    private int Winnings;
+    private bool IsRolling = false;
+    private bool Joined = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5002/gameHub")
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        hubConnection.On<int, int, int, int>("GameResult", (d1, d2, d3, win) =>
+        {
+            Dice1 = d1;
+            Dice2 = d2;
+            Dice3 = d3;
+            Winnings = win;
+            IsRolling = false;
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task JoinGame()
+    {
+        if (hubConnection is not null && !string.IsNullOrEmpty(GroupName))
+        {
+            await hubConnection.SendAsync("JoinGame", GroupName);
+            Joined = true;
+        }
+    }
+
+    private async Task RollDice()
+    {
+        if (hubConnection is not null)
+        {
+            IsRolling = true;
+            await hubConnection.SendAsync("RollDice", GroupName, BetAmount, ChosenNumber);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

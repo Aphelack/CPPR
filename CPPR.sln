@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPPR.Tests", "CPPR.Tests\CP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPPR.Blazor.SSR", "CPPR.Blazor.SSR\CPPR.Blazor.SSR.csproj", "{A7BCD3BA-AAD0-4F0F-823D-E6187BCDA1CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPPR.BlazorWasm", "CPPR.BlazorWasm\CPPR.BlazorWasm.csproj", "{0B7127BE-77AE-415E-8AB2-A4562A88FCA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{A7BCD3BA-AAD0-4F0F-823D-E6187BCDA1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7BCD3BA-AAD0-4F0F-823D-E6187BCDA1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7BCD3BA-AAD0-4F0F-823D-E6187BCDA1CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B7127BE-77AE-415E-8AB2-A4562A88FCA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B7127BE-77AE-415E-8AB2-A4562A88FCA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B7127BE-77AE-415E-8AB2-A4562A88FCA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B7127BE-77AE-415E-8AB2-A4562A88FCA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

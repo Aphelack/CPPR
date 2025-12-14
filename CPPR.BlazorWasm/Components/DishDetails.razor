@@ -1,0 +1,31 @@
+@using CPPR.Domain.Entities
+
+@if (Dish != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Dish.Name</h5>
+                    <button type="button" class="btn-close" @onclick="OnClose"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="@Dish.Image" class="img-fluid mb-3" alt="@Dish.Name">
+                    <p>@Dish.Description</p>
+                    <p>Calories: @Dish.Calories</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="OnClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Dish? Dish { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+}

@@ -1,0 +1,48 @@
+@page "/catalog"
+@using CPPR.BlazorWasm.Components
+@using CPPR.Domain.Entities
+@inject CPPR.BlazorWasm.Services.IDataService DataService
+
+<h3>Catalog</h3>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <CategorySelector OnCategorySelected="LoadData" />
+    </div>
+</div>
+
+<DishesList OnDishSelected="ShowDetails" />
+
+<Pager OnPageSelected="LoadData" />
+
+<DishDetails Dish="SelectedDish" OnClose="CloseDetails" />
+
+@code {
+    private Dish? SelectedDish;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DataService.GetCategoryListAsync();
+        await DataService.GetProductListAsync();
+    }
+
+    private async Task LoadData(Category? category)
+    {
+        await DataService.GetProductListAsync(1);
+    }
+
+    private async Task LoadData(int page)
+    {
+        await DataService.GetProductListAsync(page);
+    }
+
+    private void ShowDetails(Dish dish)
+    {
+        SelectedDish = dish;
+    }
+
+    private void CloseDetails()
+    {
+        SelectedDish = null;
+    }
+}

@@ -1,0 +1,29 @@
+@using CPPR.Domain.Entities
+@inject CPPR.BlazorWasm.Services.IDataService DataService
+
+<div class="row">
+    @if (DataService.Dishes != null)
+    {
+        @foreach (var dish in DataService.Dishes)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="@dish.Image" class="card-img-top" alt="@dish.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">@dish.Name</h5>
+                        <p class="card-text">@dish.Description</p>
+                        <p class="card-text"><strong>Calories: @dish.Calories</strong></p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" @onclick="() => OnDishSelected.InvokeAsync(dish)">Details</button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Dish> OnDishSelected { get; set; }
+}

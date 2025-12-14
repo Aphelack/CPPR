@@ -1,0 +1,24 @@
+@inject CPPR.BlazorWasm.Services.IDataService DataService
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item @(DataService.CurrentPage == 1 ? "disabled" : "")">
+            <button class="page-link" @onclick="() => OnPageSelected.InvokeAsync(DataService.CurrentPage - 1)">Previous</button>
+        </li>
+        @for (int i = 1; i <= DataService.TotalPages; i++)
+        {
+            var pageNumber = i;
+            <li class="page-item @(DataService.CurrentPage == pageNumber ? "active" : "")">
+                <button class="page-link" @onclick="() => OnPageSelected.InvokeAsync(pageNumber)">@pageNumber</button>
+            </li>
+        }
+        <li class="page-item @(DataService.CurrentPage == DataService.TotalPages ? "disabled" : "")">
+            <button class="page-link" @onclick="() => OnPageSelected.InvokeAsync(DataService.CurrentPage + 1)">Next</button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+}
